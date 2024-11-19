@@ -1,34 +1,34 @@
-package com.example.testsoundrecord;
+package com.example.qingting.CustomView;
 
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import android.os.Handler;
 
-import java.util.concurrent.Executor;
+import com.example.qingting.R;
+
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.LogRecord;
 
 public class LoadingView extends View {
     Paint paint;
     private float maxRadius;
     private float actualRadius;
     private float increaseVal;
-    private int centerColor;
-    private int outerColor;
+    private int[] centerColor;
+    private int[] outerColor;
+    private float[] transparent;
     private float interval;  // 每10ms增长的半径
     private float innerRadius;
     private float[] radiusList;
-    private int[] colorList;
     private float r1;
     private ScheduledExecutorService scheduledExecutorService;
     private Runnable drawRunnable;
@@ -83,7 +83,7 @@ public class LoadingView extends View {
                             radiusList[i] = innerRadius;  // 为0的初始化
                         }
                         radiusList[i] += interval * (1f + (radiusList[i] - innerRadius) / (maxRadius - innerRadius));  // 加速增长
-                        colorList[i] = (int) ((1f - (radiusList[i] - innerRadius) / (maxRadius - innerRadius)) * outerColor);
+                        transparent[i] = (1f - (radiusList[i] - innerRadius) / (maxRadius - innerRadius));
                         if (radiusList[i] > r1) {
                             if (i + 1 < radiusList.length && Math.abs(radiusList[i + 1] - -1f) < 10e-6) {
                                 radiusList[i + 1] = innerRadius;
@@ -107,9 +107,8 @@ public class LoadingView extends View {
     }
 
     private void initColor() {
-        centerColor = 255;
-        outerColor = centerColor - 160;
-        colorList = new int[] { outerColor, outerColor, outerColor };
+        centerColor = new int[] { 118, 194, 175 };;
+        transparent = new float[3];
     }
 
     @Override
@@ -136,12 +135,12 @@ public class LoadingView extends View {
         // 每过10ms半径增长，增长到r1时下一道出现，增长到r2时消失
         // 共3道波纹，3道都消失时重置
         for (int i = 0; i < radiusList.length; ++i) {
-            paint.setColor(Color.rgb(colorList[i], colorList[i], colorList[i]));
+            paint.setColor(Color.argb(transparent[i], centerColor[0] / 255f, centerColor[1] / 255f, centerColor[2] / 255f));
             canvas.drawCircle(cx, cy, radiusList[i], paint);
         }
-
+        Log.e("gg", ""+transparent[0] + transparent[1] + transparent[2]);
         // 绘制中心实心圆
-        paint.setColor(Color.rgb(centerColor, centerColor, centerColor));
+        paint.setColor(Color.rgb(centerColor[0], centerColor[1], centerColor[2]));
         canvas.drawCircle(cx, cy, actualRadius, paint);
     }
 }
